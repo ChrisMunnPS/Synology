@@ -46,7 +46,7 @@ services:
       - 3309:3306
     network_mode: rommbridge
     volumes:
-      - /volume1/docker/mariadb-romm:/var/lib/mysql
+      - /volume1/docker/romm/mariadb-romm:/var/lib/mysql
     healthcheck:
       test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
       start_period: 30s
