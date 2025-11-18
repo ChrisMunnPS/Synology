@@ -1,0 +1,62 @@
+version: "3.9"
+
+services:
+  mariadb:
+    image: mariadb:10.7
+    container_name: romm-db
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MARIADB_DATABASE: romm
+      MARIADB_USER: romm_user
+      MARIADB_PASSWORD: ${DB_PASSWORD}
+      TZ: Europe/London
+    volumes:
+      - /volume1/docker/romm/mariadb:/var/lib/mysql
+    user: "1030:100"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: romm-redis
+    restart: unless-stopped
+    volumes:
+      - /volume1/docker/romm/redis-data:/data
+    user: "1030:100"
+
+  romm:
+    image: rommapp/romm:latest
+    container_name: romm
+    restart: unless-stopped
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    ports:
+      - "8070:8080"
+    environment:
+      TZ: Europe/London
+
+      DB_HOST: mariadb
+      DB_PORT: 3306
+      DB_NAME: romm
+      DB_USER: romm_user
+      DB_PASSWD: ${DB_PASSWORD}
+
+      ROMM_AUTH_SECRET_KEY: ${ROMM_SECRET_KEY}
+
+      IGDB_CLIENT_ID: ${IGDB_CLIENT_ID}
+      IGDB_CLIENT_SECRET: ${IGDB_CLIENT_SECRET}
+
+    volumes:
+      - /volume1/docker/romm/config:/romm/config
+      - /volume1/docker/romm/assets:/romm/assets
+      - /volume1/docker/romm/resources:/romm/resources
+      - /volume1/data/media/games:/romm/library
+
+    user: "1030:100"
