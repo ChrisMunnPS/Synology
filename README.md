@@ -1,4 +1,3 @@
-```markdown
 # 🚀 RomM on Synology NAS (Docker + Portainer)
 
 ## 📌 Executive Summary
